@@ -9,9 +9,12 @@
 namespace Monoless\Xe\OAuth2\Server\Utils;
 
 
+use Tuupola\Base62;
 
 class CommonUtil
 {
+    const DELIMITER = '|*|';
+
     /**
      * @param string $email
      * @param string $mask
@@ -29,5 +32,36 @@ class CommonUtil
             '@',
             end($em)
         ]);
+    }
+
+    /**
+     * @param integer $id
+     * @return string
+     */
+    public static function encodeId($id)
+    {
+        $base62 = new Base62();
+
+        return $base62->encode(implode([
+            $id,
+            self::DELIMITER,
+            Context::get('domain')
+        ]));
+    }
+
+    /**
+     * @param $encoded
+     * @return string|null
+     */
+    public static function decodeId($encoded)
+    {
+        $base62 = new Base62();
+
+        $decoded = explode(self::DELIMITER, $base62->decode($encoded));
+        if (1 < count($decoded)) {
+            return $decoded[0];
+        } else {
+            return null;
+        }
     }
 }
