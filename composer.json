@@ -1,6 +1,6 @@
 {
     "name": "monoless/xe-oauth2-server-bundle",
-    "minimum-stability": "dev",
+    "minimum-stability": "dev-master",
     "description": "XpressEngine OAuth2 Server Bundle",
     "type": "library",
     "require": {
