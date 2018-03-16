@@ -9,64 +9,25 @@
 namespace Monoless\Xe\OAuth2\Server\Utils;
 
 
-use Psr\Http\Message\ResponseInterface;
-use Zend\Diactoros\Stream;
 
 class CommonUtil
 {
     /**
-     * @param string $permission
-     * @return array
+     * @param string $email
+     * @param string $mask
+     * @return string
      */
-    public static function permissionToScope($permission = 'r')
+    public static function obfuscateEmail($email, $mask = '*')
     {
-        if ('r' == $permission) {
-            return ['read'];
-        } elseif ('w' == $permission) {
-            return ['read', 'write'];
-        } elseif ('m' == $permission) {
-            return ['read', 'write', 'message'];
-        } else {
-            return [];
-        }
-    }
+        $em   = explode("@", $email);
+        $name = implode(array_slice($em, 0, count($em) - 1), '@');
+        $len  = floor(strlen($name) / 2);
 
-    /**
-     * @param ResponseInterface $response
-     * @return \BaseObject
-     */
-    public static function finalizeResponse(ResponseInterface $response)
-    {
-        foreach ($response->getHeaders() as $name => $values) {
-            foreach ($values as $value) {
-                header(sprintf('%s: %s', $name, $value), false);
-            }
-        }
-
-        header(sprintf(
-            'HTTP/%s %s %s',
-            $response->getProtocolVersion(),
-            $response->getStatusCode(),
-            $response->getReasonPhrase()
-        ));
-
-        echo $response->getBody();
-
-        return new \BaseObject();
-    }
-
-    /**
-     * @param ResponseInterface $response
-     * @param \Exception $exception
-     * @return \BaseObject
-     */
-    public static function finalizeExceptionResponse(ResponseInterface $response, \Exception $exception)
-    {
-        $body = new Stream('php://temp', 'r+');
-        $body->write($exception->getMessage());
-
-        $response->withStatus(500)->withBody($body);
-
-        return self::finalizeResponse($response);
+        return implode([
+            substr($name,0, $len),
+            str_repeat($mask, $len),
+            '@',
+            end($em)
+        ]);
     }
 }
