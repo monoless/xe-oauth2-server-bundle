@@ -51,6 +51,8 @@ class CommonUtil
         ));
 
         echo $response->getBody();
+
+        return new \BaseObject();
     }
 
     /**
