@@ -29,6 +29,7 @@ class AuthorizationService
      */
     private static function tokensExpireIn()
     {
+        // 1 hour
         return new \DateInterval('PT1H');
     }
 
@@ -38,7 +39,18 @@ class AuthorizationService
      */
     private static function authCodeExpiresIn()
     {
+        // 10 min
         return new \DateInterval('PT10M');
+    }
+
+    /**
+     * @return \DateInterval
+     * @throws \Exception
+     */
+    private static function refreshTokenExpiresIn()
+    {
+        // 1 month
+        return new \DateInterval('P1M');
     }
 
     /**
@@ -73,9 +85,12 @@ class AuthorizationService
             self::tokensExpireIn()
         );
 
+        $refreshTokenGrant = new RefreshTokenGrant($refreshTokenRepository);
+        $refreshTokenGrant->setRefreshTokenTTL(self::refreshTokenExpiresIn());
+
         // refresh token
         $server->enableGrantType(
-            new RefreshTokenGrant($refreshTokenRepository),
+            $refreshTokenGrant,
             self::tokensExpireIn()
         );
 
