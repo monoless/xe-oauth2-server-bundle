@@ -1,21 +1,16 @@
 {
-  "name": "monoless/xe-oauth2-server-bundle",
-  "description": "OAuth Server for XpressEngine",
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "Hyun seok Li",
-      "email": "ecst@monolife.co.kr",
-      "homepage": "https://monolife.co.kr/"
-    }
-  ],
-  "autoload": {
-    "psr-4": {
-      "Monoless\\Xe\\OAuth2\\Server\\": "src/"
-    }
-  },
-  "require": {
-    "league/oauth2-server": "7.0.0",
-    "zendframework/zend-diactoros": "1.7.1"
-  }
+    "name": "ecst/xe-oauth2-server-bundle",
+    "description": "XpressEngine OAuth2 Server Bundle",
+    "type": "library",
+    "require": {
+        "league/oauth2-server": "~7.0.0",
+        "zendframework/zend-diactoros": "~1.7.1"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "monoless",
+            "email": "ecst@monolife.co.kr"
+        }
+    ]
 }
