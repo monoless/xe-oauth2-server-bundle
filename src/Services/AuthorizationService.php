@@ -9,19 +9,38 @@
 namespace Monoless\Xe\OAuth2\Server\Services;
 
 
-use GuzzleHttp\Psr7\Response;
 use League\OAuth2\Server\AuthorizationServer;
 use League\OAuth2\Server\Grant\AuthCodeGrant;
+use League\OAuth2\Server\Grant\RefreshTokenGrant;
 use Monoless\Xe\OAuth2\Server\Entities\UserEntity;
 use Monoless\Xe\OAuth2\Server\Repositories\AccessTokenRepository;
 use Monoless\Xe\OAuth2\Server\Repositories\AuthCodeRepository;
 use Monoless\Xe\OAuth2\Server\Repositories\ClientRepository;
 use Monoless\Xe\OAuth2\Server\Repositories\RefreshTokenRepository;
 use Monoless\Xe\OAuth2\Server\Repositories\ScopeRepository;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 class AuthorizationService
 {
+    /**
+     * @return \DateInterval
+     * @throws \Exception
+     */
+    private static function tokensExpireIn()
+    {
+        return new \DateInterval('PT1H');
+    }
+
+    /**
+     * @return \DateInterval
+     * @throws \Exception
+     */
+    private static function authCodeExpiresIn()
+    {
+        return new \DateInterval('PT10M');
+    }
+
     /**
      * @param string $privateKeyPath
      * @param string $encryptionKey
@@ -44,13 +63,20 @@ class AuthorizationService
             $encryptionKey
         );
 
+        // auth code grant
         $server->enableGrantType(
             new AuthCodeGrant(
                 $authCodeRepository,
                 $refreshTokenRepository,
-                new \DateInterval('PT10M')
+                self::authCodeExpiresIn()
             ),
-            new \DateInterval('PT1H')
+            self::tokensExpireIn()
+        );
+
+        // refresh token
+        $server->enableGrantType(
+            new RefreshTokenGrant($refreshTokenRepository),
+            self::tokensExpireIn()
         );
 
         return $server;
@@ -59,14 +85,14 @@ class AuthorizationService
     /**
      * @param AuthorizationServer $server
      * @param ServerRequestInterface $request
-     * @param Response $response
+     * @param ResponseInterface $response
      * @param UserEntity $userEntity
      * @return \Psr\Http\Message\ResponseInterface
      * @throws \League\OAuth2\Server\Exception\OAuthServerException
      */
     public static function authorizationApprove(AuthorizationServer $server,
                               ServerRequestInterface $request,
-                              Response $response,
+                              ResponseInterface $response,
                               UserEntity $userEntity)
     {
         $authRequest = $server->validateAuthorizationRequest($request);
