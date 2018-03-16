@@ -1,5 +1,5 @@
 {
-    "name": "ecst/xe-oauth2-server-bundle",
+    "name": "monoless/xe-oauth2-server-bundle",
     "description": "XpressEngine OAuth2 Server Bundle",
     "type": "library",
     "require": {
@@ -12,5 +12,10 @@
             "name": "monoless",
             "email": "ecst@monolife.co.kr"
         }
-    ]
+    ],
+    "autoload": {
+      "psr-4": {
+        "Monoless\\Xe\\OAuth2\\Server\\": "src/"
+      }
+    }
 }
