@@ -1,5 +1,6 @@
 {
     "name": "monoless/xe-oauth2-server-bundle",
+    "minimum-stability": "dev",
     "description": "XpressEngine OAuth2 Server Bundle",
     "type": "library",
     "require": {
@@ -14,8 +15,8 @@
         }
     ],
     "autoload": {
-      "psr-4": {
-        "Monoless\\Xe\\OAuth2\\Server\\": "src/"
-      }
+        "psr-4": {
+            "Monoless\\Xe\\OAuth2\\Server\\": "src/"
+        }
     }
 }
