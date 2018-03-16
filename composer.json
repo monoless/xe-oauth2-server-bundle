@@ -6,7 +6,7 @@
     "require": {
         "league/oauth2-server": "~7.0.0",
         "zendframework/zend-diactoros": "~1.7.1",
-        "tuupola/base62": "dev-master"
+        "tuupola/base62": "~0.9.0"
     },
     "license": "MIT",
     "authors": [
