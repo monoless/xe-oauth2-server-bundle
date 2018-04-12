@@ -9,14 +9,48 @@
 namespace Monoless\Xe\OAuth2\Server\Utils;
 
 
+use GuzzleHttp\Psr7\ServerRequest;
+use Monoless\Xe\OAuth2\Server\Entities\ClientEntity;
 use Psr\Http\Message\ResponseInterface;
+use Zend\Diactoros\Response\JsonResponse;
 use Zend\Diactoros\Stream;
 
 class ResponseUtil
 {
     /**
+     * @param ServerRequest $request
+     * @param ClientEntity $entity
+     * @param string $state
+     * @return string
+     */
+    public static function authorizeRedirectUrl(ServerRequest $request, ClientEntity $entity, $state = '')
+    {
+        $params = $request->getServerParams();
+
+        return implode([
+            array_key_exists('PHP_SELF', $params) ? $params['PHP_SELF'] : '',
+            '?',
+            http_build_query([
+                'module' => 'devcenter',
+                'act' => 'dispDevcenterAuthorize',
+                'response_type' => 'code',
+                'client_id' => $entity->getIdentifier(),
+                'scope' => implode(' ', $entity->getScope()),
+                'state' => $state
+            ])
+        ]);
+    }
+
+    public static function notSupportedMethod()
+    {
+        return new JsonResponse([
+            'error' => 'method_not_allowed',
+            'message' => 'method invalid',
+        ], 405);
+    }
+
+    /**
      * @param ResponseInterface $response
-     * @return \BaseObject
      */
     public static function finalizeResponse(ResponseInterface $response)
     {
@@ -34,14 +68,12 @@ class ResponseUtil
         ));
 
         echo $response->getBody();
-
-        return new \BaseObject();
+        exit;
     }
 
     /**
      * @param ResponseInterface $response
      * @param \Exception $exception
-     * @return \BaseObject
      */
     public static function finalizeExceptionResponse(ResponseInterface $response, \Exception $exception)
     {
@@ -49,7 +81,6 @@ class ResponseUtil
         $body->write($exception->getMessage());
 
         $response->withStatus(500)->withBody($body);
-
-        return self::finalizeResponse($response);
+        self::finalizeResponse($response);
     }
 }

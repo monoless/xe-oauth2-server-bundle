@@ -11,7 +11,7 @@ namespace Monoless\Xe\OAuth2\Server\Repositories;
 
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Repositories\UserRepositoryInterface;
-use Monoless\Xe\OAuth2\Server\Entities\UserEntity;
+use League\OAuth2\Server\Entities\UserEntityInterface;
 
 class UserRepository implements UserRepositoryInterface
 {
@@ -21,7 +21,7 @@ class UserRepository implements UserRepositoryInterface
      * @param string $password
      * @param string $grantType
      * @param ClientEntityInterface $clientEntity
-     * @return \League\OAuth2\Server\Entities\UserEntityInterface|void
+     * @return UserEntityInterface|void
      */
     public function getUserEntityByUserCredentials($username, $password, $grantType,
                                                    ClientEntityInterface $clientEntity)

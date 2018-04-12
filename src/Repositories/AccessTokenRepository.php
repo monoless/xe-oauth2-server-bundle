@@ -13,6 +13,7 @@ use League\OAuth2\Server\Entities\AccessTokenEntityInterface;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Repositories\AccessTokenRepositoryInterface;
 use Monoless\Xe\OAuth2\Server\Entities\AccessTokenEntity;
+use Monoless\Xe\OAuth2\Server\Utils\RequestUtil;
 
 class AccessTokenRepository implements AccessTokenRepositoryInterface
 {
@@ -23,9 +24,9 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
     public function persistNewAccessToken(AccessTokenEntityInterface $accessTokenEntity)
     {
         $entry = new \stdClass();
-        $entry->unique_srl = $accessTokenEntity->getIdentifier();
+        $entry->unique_token_srl = $accessTokenEntity->getIdentifier();
         $entry->member_srl = $accessTokenEntity->getUserIdentifier();
-        $entry->app_unique_srl = $accessTokenEntity->getClient()->getIdentifier();
+        $entry->unique_app_srl = $accessTokenEntity->getClient()->getIdentifier();
         $entry->name = '';
         $entry->scopes = json_encode($accessTokenEntity->getScopes());
         $entry->revoked = 'n';
@@ -35,31 +36,61 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
             ->setTimezone(new \DateTimeZone(date_default_timezone_get()))
             ->format('YmdHis');
 
-        executeQuery('oauth_server.insertAccessToken', $entry);
+        executeQuery('devcenter.insertAccessToken', $entry);
+
+        if (getModule('loginlog', 'class')) {
+            $entry = new \stdClass;
+            $entry->log_srl = getNextSequence();
+            $entry->member_srl = $accessTokenEntity->getUserIdentifier();
+            $entry->is_succeed = 'Y';
+            $entry->regdate = date('YmdHis');
+            $entry->platform = 'OAuth2';
+            $entry->browser = $accessTokenEntity->getClient()->getName();
+            $entry->user_id = 0;
+            $entry->email_address = 0;
+            $entry->ipaddress = RequestUtil::getIp();
+
+            executeQuery('loginlog.insertLoginlog', $entry);
+        }
     }
 
     /**
-     * @param string $tokenId
+     * @param string $uniqueAppSrl
+     * @param integer $memberSrl
      */
-    public function revokeAccessToken($tokenId)
+    public function revokeAccessTokenByUniqueAppSrlAndMemberSrl($uniqueAppSrl, $memberSrl)
     {
         $args = new \stdClass();
-        $args->tokenId = $tokenId;
+        $args->unique_app_srl = $uniqueAppSrl;
+        $args->member_srl = $memberSrl;
         $args->revoked = 'y';
         $args->updated_at = date('YmdHis');
 
-        executeQuery('oauth_server.updateRevokedFromAccessToken', $args);
+        executeQuery('devcenter.updateRevokedFromAccessTokenByUniqueAppSrlAndMemberSrl', $args);
     }
 
     /**
-     * @param string $tokenId
-     * @return bool
+     * @param string $uniqueTokenSrl
      */
-    public function isAccessTokenRevoked($tokenId)
+    public function revokeAccessToken($uniqueTokenSrl)
     {
         $args = new \stdClass();
-        $args->tokenId = $tokenId;
-        $output = executeQuery('oauth_server.findAccessTokenByTokenId', $args);
+        $args->unique_token_srl = $uniqueTokenSrl;
+        $args->revoked = 'y';
+        $args->updated_at = date('YmdHis');
+
+        executeQuery('devcenter.updateRevokedFromAccessToken', $args);
+    }
+
+    /**
+     * @param string $uniqueTokenSrl
+     * @return bool
+     */
+    public function isAccessTokenRevoked($uniqueTokenSrl)
+    {
+        $args = new \stdClass();
+        $args->unique_token_srl = $uniqueTokenSrl;
+        $output = executeQuery('devcenter.findAccessTokenByUniqueTokenSrl', $args);
 
         // Check if client is registered
         if (!$output->toBool() || !count($output->data)) {

@@ -21,9 +21,11 @@ class RefreshTokenRepository implements RefreshTokenRepositoryInterface
      */
     public function persistNewRefreshToken(RefreshTokenEntityInterface $refreshTokenEntity)
     {
+        $accessToken = $refreshTokenEntity->getAccessToken();
+
         $entry = new \stdClass();
-        $entry->unique_srl = $refreshTokenEntity->getIdentifier();
-        $entry->access_token_srl = $refreshTokenEntity->getAccessToken()->getIdentifier();
+        $entry->unique_token_srl = $refreshTokenEntity->getIdentifier();
+        $entry->access_token_srl = $accessToken->getIdentifier();
         $entry->revoked = 'n';
         $entry->created_at = date('YmdHis');
         $entry->updated_at = date('YmdHis');
@@ -31,31 +33,54 @@ class RefreshTokenRepository implements RefreshTokenRepositoryInterface
             ->setTimezone(new \DateTimeZone(date_default_timezone_get()))
             ->format('YmdHis');
 
-        executeQuery('oauth_server.insertRefreshToken', $entry);
+        executeQuery('devcenter.insertRefreshToken', $entry);
     }
 
     /**
-     * @param string $tokenId
+     * @param string $uniqueAppSrl
+     * @param integer $memberSrl
      */
-    public function revokeRefreshToken($tokenId)
+    public function revokeRefreshTokenByUniqueAppSrlAndMemberSrl($uniqueAppSrl, $memberSrl)
+    {
+        $entry = new \stdClass();
+        $entry->unique_app_srl = $uniqueAppSrl;
+        $entry->member_srl = $memberSrl;
+        $entry->expired_at = date('YmdHis');
+
+        $output = executeQueryArray('devcenter.findActiveRefreshTokenByUniqueAppSrlAndMemberSrl', $entry);
+
+        if (!$output->toBool() || !count($output->data)) {
+            return;
+        }
+
+        $entries = $output->data;
+        foreach ($entries as $entry) {
+            $this->revokeRefreshToken($entry->unique_token_srl);
+        }
+    }
+
+    /**
+     * @param string $uniqueTokenSrl
+     */
+    public function revokeRefreshToken($uniqueTokenSrl)
     {
         $args = new \stdClass();
-        $args->tokenId = $tokenId;
+        $args->unique_token_srl = $uniqueTokenSrl;
         $args->revoked = 'y';
         $args->updated_at = date('YmdHis');
 
-        executeQuery('oauth_server.updateRevokedFromRefreshToken', $args);
+        executeQuery('devcenter.updateRevokedFromRefreshToken', $args);
     }
 
     /**
-     * @param string $tokenId
+     * @param string $uniqueTokenSrl
      * @return bool
      */
-    public function isRefreshTokenRevoked($tokenId)
+    public function isRefreshTokenRevoked($uniqueTokenSrl)
     {
         $args = new \stdClass();
-        $args->tokenId = $tokenId;
-        $output = executeQuery('oauth_server.findRefreshTokenByTokenId', $args);
+        $args->unique_token_srl = $uniqueTokenSrl;
+        $output = executeQuery('devcenter.findRefreshTokenByUniqueTokenSrl', $args);
 
         // Check if client is registered
         if (!$output->toBool() || !count($output->data)) {

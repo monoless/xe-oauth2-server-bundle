@@ -9,6 +9,7 @@
 namespace Monoless\Xe\OAuth2\Server\Utils;
 
 
+use Lcobucci\JWT\Parser;
 use Tuupola\Base62;
 
 class CommonUtil
@@ -43,9 +44,9 @@ class CommonUtil
         $base62 = new Base62();
 
         return $base62->encode(implode([
-            $id,
+            sprintf("%'.09d", $id),
             self::DELIMITER,
-            Context::get('domain')
+            sha1($_SERVER['HTTP_HOST'])
         ]));
     }
 
@@ -59,9 +60,18 @@ class CommonUtil
 
         $decoded = explode(self::DELIMITER, $base62->decode($encoded));
         if (1 < count($decoded)) {
-            return $decoded[0];
+            return (int) $decoded[0];
         } else {
             return null;
         }
+    }
+
+    /**
+     * @param string $jwt
+     * @return \Lcobucci\JWT\Token
+     */
+    public static function parseJwt($jwt)
+    {
+        return (new Parser())->parse($jwt);
     }
 }

@@ -22,9 +22,9 @@ class AuthCodeRepository implements AuthCodeRepositoryInterface
     public function persistNewAuthCode(AuthCodeEntityInterface $authCodeEntity)
     {
         $entry = new \stdClass();
-        $entry->unique_srl = $authCodeEntity->getIdentifier();
+        $entry->unique_token_srl = $authCodeEntity->getIdentifier();
         $entry->member_srl = $authCodeEntity->getUserIdentifier();
-        $entry->app_unique_srl = $authCodeEntity->getClient()->getIdentifier();
+        $entry->unique_app_srl = $authCodeEntity->getClient()->getIdentifier();
         $entry->scopes = json_encode($authCodeEntity->getScopes());
         $entry->revoked = 'n';
         $entry->created_at = date('YmdHis');
@@ -33,31 +33,31 @@ class AuthCodeRepository implements AuthCodeRepositoryInterface
             ->setTimezone(new \DateTimeZone(date_default_timezone_get()))
             ->format('YmdHis');
 
-        executeQuery('oauth_server.insertAuthCode', $entry);
+        executeQuery('devcenter.insertAuthCode', $entry);
     }
 
     /**
-     * @param string $codeId
+     * @param string $uniqueTokenSrl
      */
-    public function revokeAuthCode($codeId)
+    public function revokeAuthCode($uniqueTokenSrl)
     {
         $args = new \stdClass();
-        $args->codeId = $codeId;
+        $args->unique_token_srl = $uniqueTokenSrl;
         $args->revoked = 'y';
         $args->updated_at = date('YmdHis');
 
-        executeQuery('oauth_server.updateRevokedFromAuthCode', $args);
+        executeQuery('devcenter.updateRevokedFromAuthCode', $args);
     }
 
     /**
-     * @param string $codeId
+     * @param string $uniqueTokenSrl
      * @return bool
      */
-    public function isAuthCodeRevoked($codeId)
+    public function isAuthCodeRevoked($uniqueTokenSrl)
     {
         $args = new \stdClass();
-        $args->codeId = $codeId;
-        $output = executeQuery('oauth_server.findAuthCodeByCodeId', $args);
+        $args->unique_token_srl = $uniqueTokenSrl;
+        $output = executeQuery('devcenter.findAuthCodeByUniqueTokenSrl', $args);
 
         // Check if client is registered
         if (!$output->toBool() || !count($output->data)) {
