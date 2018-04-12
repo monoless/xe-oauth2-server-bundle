@@ -8,7 +8,7 @@
         "zendframework/zend-diactoros": "~1.7.1",
         "tuupola/base62": "~0.9.0",
         "robwittman/leaky-bucket-rate-limiter": "~1.0.0",
-        "idealo/php-middleware-stack": "~0.2.0"
+        "psr/http-server-middleware": "~1.0.0"
     },
     "require-dev": {
       "codeception/codeception": "~2.0"
