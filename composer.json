@@ -8,7 +8,7 @@
         "zendframework/zend-diactoros": "~1.7.1",
         "tuupola/base62": "~0.9.0",
         "robwittman/leaky-bucket-rate-limiter": "~1.0.0",
-        "league/route": "~3.0.4"
+        "phossa2/middleware": "~2.0.1"
     },
     "require-dev": {
       "codeception/codeception": "~2.0"
