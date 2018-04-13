@@ -32,7 +32,11 @@ class ScopeRepository implements ScopeRepositoryInterface
 
             'message' => [
                 'description' => 'send message to other guys'
-            ]
+            ],
+
+            'stream' => [
+                'description' => 'read others time line',
+            ],
         ];
 
         if (array_key_exists($scopeIdentifier, $scopes) === false) {

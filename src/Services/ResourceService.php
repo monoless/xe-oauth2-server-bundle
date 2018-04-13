@@ -13,18 +13,39 @@ use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\ServerRequest;
 use League\OAuth2\Server\Middleware\ResourceServerMiddleware;
 use League\OAuth2\Server\ResourceServer;
+use LeakyBucketRateLimiter\RateLimiter;
+use Monoless\Xe\OAuth2\Server\Conditions\InvalidHttpStatusCondition;
 use Monoless\Xe\OAuth2\Server\Repositories\AccessTokenRepository;
 use Monoless\Xe\OAuth2\Server\Utils\ResponseUtil;
+use Phossa2\Middleware\Queue;
+use Phossa2\Middleware\TerminateQueue;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
+use Zend\Diactoros\Response\JsonResponse;
 
 class ResourceService
 {
     /**
      * @param string $publicKeyPath
+     * @return Queue
+     */
+    private static function getMiddlewareQueues($publicKeyPath)
+    {
+        $queues = [new ResourceServerMiddleware(self::getResourceServer($publicKeyPath))];
+
+        // TODO
+        if (1) {
+            $queues[] = [new TerminateQueue(), new InvalidHttpStatusCondition()];
+            $queues[] = self::getRateLimiter();
+        }
+
+        return new Queue($queues);
+    }
+
+    /**
+     * @param string $publicKeyPath
      * @return ResourceServer
      */
-    private static function getServer($publicKeyPath)
+    private static function getResourceServer($publicKeyPath)
     {
         return new ResourceServer(
             new AccessTokenRepository(),
@@ -33,32 +54,48 @@ class ResourceService
     }
 
     /**
-     * @param ResourceServer $resourceServer
-     * @param ServerRequestInterface $request
-     * @param ResponseInterface $response
-     * @param $next
-     * @return ResponseInterface
+     * @return RateLimiter
      */
-    private static function process(ResourceServer $resourceServer,
-                                   ServerRequestInterface $request,
-                                   ResponseInterface $response,
-                                   $next)
+    private static function getRateLimiter()
     {
-        $middleware = new ResourceServerMiddleware($resourceServer);
-        return $middleware($request, $response, $next);
+        return new RateLimiter([
+            'capacity' => 45,               // TODO limit hit
+            'leak' => 1,                    // TODO per second,
+            'prefix' => 'xe-devcenter-',
+            'suffix' => "-limiter",
+            'header' => "Rate-Limiting-Meta",
+            'scheme' => 'tcp://',           // TODO
+            'host' => '127.0.0.1',          // TODO
+            'port' => 6379,                 // TODO
+            'callback' => function($request) {
+                if (is_array($request)) $request = $request[0];
+                return [
+                    'token' => $request->getAttribute('oauth_user_id')
+                ];
+            },
+            'throttle' => function(ResponseInterface $response) {
+                return new JsonResponse([
+                    'error' => "User request limit reached"
+                ], 429);
+            }
+        ]);
     }
 
     /**
-     * @param string $publicKeyPath
-     * @param $callback
+     * @param $publicKeyPath
+     * @param callable $callback
      */
-    public static function processResource($publicKeyPath, $callback)
+    public static function processResource($publicKeyPath, callable $callback)
     {
-        ResponseUtil::finalizeResponse(self::process(
-            self::getServer($publicKeyPath),
-            ServerRequest::fromGlobals(),
-            new Response(),
-            $callback
-        ));
+        $queues = self::getMiddlewareQueues($publicKeyPath);
+
+        $request = ServerRequest::fromGlobals();
+        $response = new Response();
+        $response = $queues($request, $response);;
+        if (!(new InvalidHttpStatusCondition())->evaluate($request, $response)) {
+            $response = $callback($request, $response);
+        }
+
+        ResponseUtil::finalizeResponse($response);
     }
 }

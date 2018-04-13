@@ -97,7 +97,11 @@ class XpressService
             }
         }
 
-        return new JsonResponse($entries);
+        return new JsonResponse(
+            $entries,
+            200,
+            $response->getHeaders()
+        );
     }
 
     /**
@@ -107,7 +111,11 @@ class XpressService
      */
     public static function getSitemap(RequestInterface $request, ResponseInterface $response)
     {
-        return new JsonResponse(XpressSupport::getSitemap());
+        return new JsonResponse(
+            XpressSupport::getSitemap(),
+            200,
+            $response->getHeaders()
+        );
     }
 
     /**
@@ -204,7 +212,11 @@ class XpressService
             }
         }
 
-        return new JsonResponse($entries);
+        return new JsonResponse(
+            $entries,
+            200,
+            $response->getHeaders()
+        );
     }
 
     /**
@@ -261,9 +273,11 @@ class XpressService
             ], 401);
         }
 
-        return new JsonResponse([
-            'status' => $status
-        ]);
+        return new JsonResponse(
+            ['status' => $status],
+            200,
+            $response->getHeaders()
+        );
     }
 
     /**
@@ -321,9 +335,11 @@ class XpressService
             ], 401);
         }
 
-        return new JsonResponse([
-            'status' => $status
-        ]);
+        return new JsonResponse(
+            ['status' => $status],
+            200,
+            $response->getHeaders()
+        );
     }
 
     /**
@@ -369,9 +385,11 @@ class XpressService
             ], 500);
         }
 
-        return new JsonResponse([
-            'status' => $status
-        ]);
+        return new JsonResponse(
+            ['status' => $status],
+            200,
+            $response->getHeaders()
+        );
     }
 
     /**
@@ -439,7 +457,11 @@ class XpressService
             $entries = XpressUtil::convertDocumentComments($objDocument);
         }
 
-        return new JsonResponse($entries);
+        return new JsonResponse(
+            $entries,
+            200,
+            $response->getHeaders()
+        );
     }
 
     /**
@@ -500,9 +522,11 @@ class XpressService
             ], 401);
         }
 
-        return new JsonResponse([
-            'status' => $status
-        ]);
+        return new JsonResponse(
+            ['status' => $status],
+            200,
+            $response->getHeaders()
+        );
     }
 
     /**
@@ -562,9 +586,11 @@ class XpressService
             ], 401);
         }
 
-        return new JsonResponse([
-            'status' => $status
-        ]);
+        return new JsonResponse(
+            ['status' => $status],
+            200,
+            $response->getHeaders()
+        );
     }
 
     /**
@@ -611,9 +637,11 @@ class XpressService
             ], 500);
         }
 
-        return new JsonResponse([
-            'status' => $status
-        ]);
+        return new JsonResponse(
+            ['status' => $status],
+            200,
+            $response->getHeaders()
+        );
     }
 
     /**
@@ -653,7 +681,9 @@ class XpressService
         $documentList = \Context::get('document_list');
 
         return new JsonResponse(
-            XpressUtil::convertScrapDocumentList($pageNav, $documentList)
+            XpressUtil::convertScrapDocumentList($pageNav, $documentList),
+            200,
+            $response->getHeaders()
         );
     }
 
@@ -699,9 +729,11 @@ class XpressService
             ], 500);
         }
 
-        return new JsonResponse([
-            'status' => $status
-        ]);
+        return new JsonResponse(
+            ['status' => $status],
+            200,
+            $response->getHeaders()
+        );
     }
 
     /**
@@ -746,9 +778,11 @@ class XpressService
             ], 500);
         }
 
-        return new JsonResponse([
-            'status' => $status
-        ]);
+        return new JsonResponse(
+            ['status' => $status],
+            200,
+            $response->getHeaders()
+        );
     }
 
     /**
@@ -788,7 +822,9 @@ class XpressService
         }
 
         return new JsonResponse(
-            XpressUtil::convertDocumentItems($pageNavigation, $entries)
+            XpressUtil::convertDocumentItems($pageNavigation, $entries),
+            200,
+            $response->getHeaders()
         );
     }
 
@@ -819,7 +855,11 @@ class XpressService
             $entries = XpressUtil::convertMyComments($entries);
         }
 
-        return new JsonResponse($entries);
+        return new JsonResponse(
+            $entries,
+            200,
+            $response->getHeaders()
+        );
     }
 
     /**
@@ -858,7 +898,9 @@ class XpressService
         $entries = \Context::get('friend_list');
 
         return new JsonResponse([
-            XpressUtil::convertFriends($pageNavigation, $entries)
+            XpressUtil::convertFriends($pageNavigation, $entries),
+            200,
+            $response->getHeaders()
         ]);
     }
 
@@ -905,9 +947,11 @@ class XpressService
             ], 500);
         }
 
-        return new JsonResponse([
-            'status' => $status
-        ]);
+        return new JsonResponse(
+            ['status' => $status],
+            200,
+            $response->getHeaders()
+        );
     }
 
     /**
@@ -964,9 +1008,11 @@ class XpressService
             ], 500);
         }
 
-        return new JsonResponse([
-            'status' => $status
-        ]);
+        return new JsonResponse(
+            ['status' => $status],
+            200,
+            $response->getHeaders()
+        );
     }
 
     /**
@@ -1020,9 +1066,11 @@ class XpressService
              */
             $entries = \Context::get('message_list');
 
-            return new JsonResponse([
-                XpressUtil::convertMessages($pageNavigation, $entries)
-            ]);
+            return new JsonResponse(
+                XpressUtil::convertMessages($pageNavigation, $entries),
+                200,
+                $response->getHeaders()
+            );
         } else {
             $message = \Context::get('message');
             if (!$message) {
@@ -1031,9 +1079,11 @@ class XpressService
                     'message' => 'The resource is gone',
                 ], 404);
             } else {
-                return new JsonResponse([
-                    XpressUtil::convertMessage($message)
-                ]);
+                return new JsonResponse(
+                    XpressUtil::convertMessage($message),
+                    200,
+                    $response->getHeaders()
+                );
             }
         }
     }
@@ -1082,9 +1132,11 @@ class XpressService
             ], 500);
         }
 
-        return new JsonResponse([
-            'status' => $status
-        ]);
+        return new JsonResponse(
+            ['status' => $status],
+            200,
+            $response->getHeaders()
+        );
     }
 
     /**
@@ -1120,9 +1172,11 @@ class XpressService
             ], 500);
         }
 
-        return new JsonResponse([
-            'status' => $status
-        ]);
+        return new JsonResponse(
+            ['status' => $status],
+            200,
+            $response->getHeaders()
+        );
     }
 
     /**
@@ -1167,8 +1221,10 @@ class XpressService
          */
         $entries = \Context::get('histories');
 
-        return new JsonResponse([
-            XpressUtil::convertLoginHistories($pageNavigation, $entries)
-        ]);
+        return new JsonResponse(
+            XpressUtil::convertLoginHistories($pageNavigation, $entries),
+            200,
+            $response->getHeaders()
+        );
     }
 }
