@@ -18,6 +18,7 @@ use Monoless\Xe\OAuth2\Server\Conditions\InvalidHttpStatusCondition;
 use Monoless\Xe\OAuth2\Server\Repositories\AccessTokenRepository;
 use Monoless\Xe\OAuth2\Server\Utils\RequestUtil;
 use Monoless\Xe\OAuth2\Server\Utils\ResponseUtil;
+use Phossa2\Middleware\Interfaces\MiddlewareInterface;
 use Phossa2\Middleware\Queue;
 use Phossa2\Middleware\TerminateQueue;
 use Psr\Http\Message\ResponseInterface;
@@ -25,23 +26,6 @@ use Zend\Diactoros\Response\JsonResponse;
 
 class ResourceService
 {
-    /**
-     * @param string $publicKeyPath
-     * @param \stdClass $config
-     * @return Queue
-     */
-    private static function getMiddlewareQueues($publicKeyPath, \stdClass $config)
-    {
-        $queues = [new ResourceServerMiddleware(self::getResourceServer($publicKeyPath))];
-
-        if ($config->use_rate_limiter) {
-            $queues[] = [new TerminateQueue(), new InvalidHttpStatusCondition()];
-            $queues[] = self::getRateLimiter($config);
-        }
-
-        return new Queue($queues);
-    }
-
     /**
      * @param string $publicKeyPath
      * @return ResourceServer
@@ -90,15 +74,20 @@ class ResourceService
      */
     public static function processResource($publicKeyPath, \stdClass $config, callable $callback)
     {
-        $queues = self::getMiddlewareQueues($publicKeyPath, $config);
-
         $request = ServerRequest::fromGlobals();
         $response = new Response();
-        $response = $queues($request, $response);;
-        if (!(new InvalidHttpStatusCondition())->evaluate($request, $response)) {
-            $response = $callback($request, $response);
+
+        $queues = [new ResourceServerMiddleware(self::getResourceServer($publicKeyPath))];
+
+        if ($config->use_rate_limiter) {
+            $queues[] = [new TerminateQueue(), new InvalidHttpStatusCondition()];
+            $queues[] = self::getRateLimiter($config);
         }
 
-        ResponseUtil::finalizeResponse($response);
+        $queues[] = [new TerminateQueue(), new InvalidHttpStatusCondition()];
+        $queues[] = $callback;
+
+        $queue = new Queue($queues);
+        ResponseUtil::finalizeResponse($queue($request, $response));
     }
 }
