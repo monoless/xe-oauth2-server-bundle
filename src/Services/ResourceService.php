@@ -16,6 +16,7 @@ use League\OAuth2\Server\ResourceServer;
 use LeakyBucketRateLimiter\RateLimiter;
 use Monoless\Xe\OAuth2\Server\Conditions\InvalidHttpStatusCondition;
 use Monoless\Xe\OAuth2\Server\Repositories\AccessTokenRepository;
+use Monoless\Xe\OAuth2\Server\Utils\RequestUtil;
 use Monoless\Xe\OAuth2\Server\Utils\ResponseUtil;
 use Phossa2\Middleware\Queue;
 use Phossa2\Middleware\TerminateQueue;
@@ -26,16 +27,16 @@ class ResourceService
 {
     /**
      * @param string $publicKeyPath
+     * @param \stdClass $config
      * @return Queue
      */
-    private static function getMiddlewareQueues($publicKeyPath)
+    private static function getMiddlewareQueues($publicKeyPath, \stdClass $config)
     {
         $queues = [new ResourceServerMiddleware(self::getResourceServer($publicKeyPath))];
 
-        // TODO
-        if (1) {
+        if ($config->use_rate_limiter) {
             $queues[] = [new TerminateQueue(), new InvalidHttpStatusCondition()];
-            $queues[] = self::getRateLimiter();
+            $queues[] = self::getRateLimiter($config);
         }
 
         return new Queue($queues);
@@ -54,19 +55,20 @@ class ResourceService
     }
 
     /**
+     * @param \stdClass $config
      * @return RateLimiter
      */
-    private static function getRateLimiter()
+    private static function getRateLimiter(\stdClass $config)
     {
         return new RateLimiter([
-            'capacity' => 45,               // TODO limit hit
-            'leak' => 1,                    // TODO per second,
-            'prefix' => 'xe-devcenter-',
-            'suffix' => "-limiter",
-            'header' => "Rate-Limiting-Meta",
-            'scheme' => 'tcp://',           // TODO
-            'host' => '127.0.0.1',          // TODO
-            'port' => 6379,                 // TODO
+            'capacity' => $config->rate_limit_capacity,
+            'leak' => 1,
+            'prefix' => RequestUtil::getHost() . '-xe-',
+            'suffix' => '-limiter',
+            'header' => 'Rate-Limiting-Meta',
+            'scheme' => 'tcp://',
+            'host' => $config->redis_host,
+            'port' => $config->redis_port,
             'callback' => function($request) {
                 if (is_array($request)) $request = $request[0];
                 return [
@@ -83,11 +85,12 @@ class ResourceService
 
     /**
      * @param $publicKeyPath
+     * @param \stdClass $config
      * @param callable $callback
      */
-    public static function processResource($publicKeyPath, callable $callback)
+    public static function processResource($publicKeyPath, \stdClass $config, callable $callback)
     {
-        $queues = self::getMiddlewareQueues($publicKeyPath);
+        $queues = self::getMiddlewareQueues($publicKeyPath, $config);
 
         $request = ServerRequest::fromGlobals();
         $response = new Response();

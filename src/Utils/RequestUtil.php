@@ -28,6 +28,11 @@ class RequestUtil
         return $params;
     }
 
+    public static function getHost()
+    {
+        return $_SERVER['HTTP_HOST'];
+    }
+
     public static function getIp()
     {
         $proxy_headers = array(
