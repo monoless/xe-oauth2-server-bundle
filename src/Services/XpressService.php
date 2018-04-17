@@ -37,10 +37,10 @@ class XpressService
         }
 
         // ignore xe memberInfo system
-        \Context::set('member_srl', '');
+        \Context::set('member_unique_srl', '');
 
         $queries = $request->getQueryParams();
-        if (array_key_exists('unique_srl', $queries)) {
+        if (array_key_exists('member_unique_srl', $queries)) {
             if (!in_array('message', $request->getAttribute('oauth_scopes'))) {
                 return new JsonResponse([
                     'error' => 'permission_denied',
@@ -48,7 +48,7 @@ class XpressService
                 ], 401);
             }
 
-            $targetSrl = CommonUtil::decodeId($queries['unique_srl']);
+            $targetSrl = CommonUtil::decodeId($queries['member_unique_srl']);
             if (!$targetSrl || !is_numeric($targetSrl)) {
                 return new JsonResponse([
                     'error' => 'not_found',
@@ -84,7 +84,7 @@ class XpressService
         $displayDatas = \Context::get('displayDatas');
 
         $entries = [
-            'unique_srl' => CommonUtil::encodeId($memberInfo['member_srl']),
+            'member_unique_srl' => CommonUtil::encodeId($memberInfo['member_srl']),
             'joined_at' => strtotime($memberInfo['regdate']),
             'allow_mailing' => ('Y' == $memberInfo['allow_mailing']),
             'allow_message' => ('Y' == $memberInfo['allow_message']),
@@ -897,11 +897,11 @@ class XpressService
          */
         $entries = \Context::get('friend_list');
 
-        return new JsonResponse([
+        return new JsonResponse(
             XpressUtil::convertFriends($pageNavigation, $entries),
             200,
             $response->getHeaders()
-        ]);
+        );
     }
 
     /**
@@ -921,13 +921,13 @@ class XpressService
         }
 
         $queries = $request->getQueryParams();
-        if (!array_key_exists('unique_srl', $queries)) {
+        if (!array_key_exists('member_unique_srl', $queries)) {
             return new JsonResponse([
                 'error' => 'not_found',
                 'message' => 'The resource is gone',
             ], 404);
         } else {
-            $targetSrl = CommonUtil::decodeId($queries['unique_srl']);
+            $targetSrl = CommonUtil::decodeId($queries['member_unique_srl']);
             if (!$targetSrl || !is_numeric($targetSrl)) {
                 return new JsonResponse([
                     'error' => 'not_found',
@@ -971,13 +971,13 @@ class XpressService
         }
 
         $queries = $request->getQueryParams();
-        if (!array_key_exists('unique_srl', $queries)) {
+        if (!array_key_exists('member_unique_srl', $queries)) {
             return new JsonResponse([
                 'error' => 'not_found',
                 'message' => 'The resource is gone',
             ], 404);
         } else {
-            $targetSrl = CommonUtil::decodeId($queries['unique_srl']);
+            $targetSrl = CommonUtil::decodeId($queries['member_unique_srl']);
             if (!$targetSrl || !is_numeric($targetSrl)) {
                 return new JsonResponse([
                     'error' => 'not_found',
@@ -1105,13 +1105,13 @@ class XpressService
         }
 
         $queries = $request->getQueryParams();
-        if (!array_key_exists('unique_srl', $queries)) {
+        if (!array_key_exists('member_unique_srl', $queries)) {
             return new JsonResponse([
                 'error' => 'not_found',
                 'message' => 'The resource is gone',
             ], 404);
         } else {
-            $targetSrl = CommonUtil::decodeId($queries['unique_srl']);
+            $targetSrl = CommonUtil::decodeId($queries['member_unique_srl']);
             if (!$targetSrl || !is_numeric($targetSrl)) {
                 return new JsonResponse([
                     'error' => 'not_found',

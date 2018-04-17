@@ -207,11 +207,13 @@ class XpressUtil
             $totalPage = $item->comment_page_navigation->total_page;
         }
 
+        $comments = $item->getComments();
+
         return [
             'count' => $count,
             'current_page' => $currentPage,
             'total_page' => $totalPage,
-            'entries' => self::convertComments($item->getComments())
+            'entries' => $comments ? self::convertComments($item->getComments()) : null
         ];
     }
 
@@ -233,7 +235,7 @@ class XpressUtil
 
             $entries[] = [
                 'comment_srl' => $comment->comment_srl,
-                'document_srl' => $comment->get('document_srl'),
+                'article_srl' => $comment->get('document_srl'),
                 'nick_name' => $comment->getNickName(),
                 'member_unique_srl' => $comment->getMemberSrl() ? CommonUtil::encodeId($comment->getMemberSrl()) : null,
                 'member_profile_image' => $comment->getProfileImage(),
@@ -344,7 +346,7 @@ class XpressUtil
 
         foreach ($friends as $friend) {
             $entries[] = [
-                'member_srl' => CommonUtil::encodeId($friend->target_srl),
+                'member_unique_srl' => CommonUtil::encodeId($friend->target_srl),
                 'nick_name' => $friend->nick_name,
                 'group_srl' => $friend->friend_group_srl,
                 'group_title' => $friend->group_title,
@@ -373,7 +375,7 @@ class XpressUtil
             $entries[] = [
                 'message_srl' => $message->message_srl,
                 'title' => $message->title,
-                'member_srl' => CommonUtil::encodeId($message->member_srl),
+                'member_unique_srl' => CommonUtil::encodeId($message->member_srl),
                 'nick_name' => $message->nick_name,
                 'is_readed' => ('Y' == $message->readed),
                 'register_at' => strtotime($message->regdate),
@@ -398,7 +400,7 @@ class XpressUtil
         return [
             'message_srl' => $message->message_srl,
             'title' => $message->title,
-            'member_srl' => CommonUtil::encodeId($message->member_srl),
+            'member_unique_srl' => CommonUtil::encodeId($message->member_srl),
             'nick_name' => $message->nick_name,
             'content' => $message->content,
             'is_readed' => ('Y' == $message->readed),
