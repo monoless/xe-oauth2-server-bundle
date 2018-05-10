@@ -151,6 +151,11 @@ class XpressService
                 'error' => 'not_found',
                 'message' => 'The resource is gone',
             ], 404);
+        } elseif ('board' != $moduleInfo->module) {
+            return new JsonResponse([
+                'error' => 'module_not_exist',
+                'message' => 'board module not exist',
+            ], 406);
         }
 
         if ($articleSrl) {
