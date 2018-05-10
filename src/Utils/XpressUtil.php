@@ -9,6 +9,7 @@
 namespace Monoless\Xe\OAuth2\Server\Utils;
 
 
+use Monoless\Xe\OAuth2\Server\Supports\XpressSupport;
 use Psr\Http\Message\RequestInterface;
 use GuzzleHttp\Psr7\ServerRequest;
 
@@ -91,10 +92,13 @@ class XpressUtil
         }
 
         foreach ($items as $item) {
+            $module = XpressSupport::getModuleInfoByMId($item['url']);
+
             $entry = [
                 'text' => $item['text'],
                 'url' => $item['url'],
-                'is_shortcut' => $item['is_shortcut']
+                'is_shortcut' => $item['is_shortcut'],
+                'module' => $module ? $module->module : ''
             ];
 
             if (array_key_exists('list', $item) && 0 < count($item['list'])) {
