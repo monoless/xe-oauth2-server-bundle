@@ -98,7 +98,8 @@ class XpressUtil
                 'text' => $item['text'],
                 'url' => $item['url'],
                 'is_shortcut' => $item['is_shortcut'],
-                'module' => $module ? $module->module : ''
+                'module' => $module ? $module->module : '',
+                'browser_title' => $module ? $module->browser_title : '',
             ];
 
             if (array_key_exists('list', $item) && 0 < count($item['list'])) {
