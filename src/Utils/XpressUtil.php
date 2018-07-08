@@ -162,9 +162,10 @@ class XpressUtil
 
     /**
      * @param \documentItem $item
+     * @param \stdClass $grant
      * @return array
      */
-    public static function convertSingleDocumentItem(\documentItem $item)
+    public static function convertSingleDocumentItem(\documentItem $item, $grant)
     {
         if ($item->isSecret() && !$item->isGranted()) {
             $content = null;
@@ -193,7 +194,7 @@ class XpressUtil
             'readed_count' => $item->get('readed_count'),
             'voted_count' => $item->get('voted_count'),
             'is_notice' => $item->isNotice(),
-            'allow_comment' => $item->allowComment(),
+            'allow_comment' => ($item->allowComment() && $grant->allow_comment),
             'register_at' => $item->getRegdateTime(),
             'updated_at' => $item->getUpdateTime(),
         ];

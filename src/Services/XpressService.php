@@ -172,6 +172,7 @@ class XpressService
         }
 
         $page = \Context::get('page');
+        $grant = \Context::get('grant');
 
         /**
          * @var \documentItem $objDocument;
@@ -179,7 +180,7 @@ class XpressService
         $objDocument = \Context::get('oDocument');
 
         if ($articleSrl && $objDocument && $objDocument->isExists()) {
-            $entries = XpressUtil::convertSingleDocumentItem($objDocument);
+            $entries = XpressUtil::convertSingleDocumentItem($objDocument, $grant);
         } elseif ($articleSrl && (!$objDocument || !$objDocument->isExists())) {
             return new JsonResponse([
                 'error' => 'not_found',
@@ -201,7 +202,6 @@ class XpressService
                 $entries = $documentList;
             }
 
-            $grant = \Context::get('grant');
             $entries = XpressUtil::convertDocumentItems($pageNavigation, $entries, $grant);
         }
 
