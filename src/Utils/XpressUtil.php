@@ -194,7 +194,7 @@ class XpressUtil
             'readed_count' => $item->get('readed_count'),
             'voted_count' => $item->get('voted_count'),
             'is_notice' => $item->isNotice(),
-            'allow_comment' => ($item->allowComment() && $grant->allow_comment),
+            'allow_comment' => ($item->allowComment() && $grant->write_comment),
             'register_at' => $item->getRegdateTime(),
             'updated_at' => $item->getUpdateTime(),
         ];
