@@ -201,7 +201,8 @@ class XpressService
                 $entries = $documentList;
             }
 
-            $entries = XpressUtil::convertDocumentItems($pageNavigation, $entries);
+            $grant = \Context::get('grant');
+            $entries = XpressUtil::convertDocumentItems($pageNavigation, $entries, $grant);
         }
 
         // for stream access

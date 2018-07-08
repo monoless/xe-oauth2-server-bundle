@@ -115,9 +115,10 @@ class XpressUtil
     /**
      * @param \PageHandler $pageNavigation
      * @param array $documentItems
+     * @param \stdClass|null $grant
      * @return array
      */
-    public static function convertDocumentItems(\PageHandler $pageNavigation, array $documentItems)
+    public static function convertDocumentItems(\PageHandler $pageNavigation, array $documentItems, $grant = null)
     {
         $count = 0;
         $currentPage = 1;
@@ -154,6 +155,7 @@ class XpressUtil
             'count' => $count,
             'current_page' => $currentPage,
             'total_page' => $totalPage,
+            'grant' => $grant,
             'entries' => $output
         ];
     }
