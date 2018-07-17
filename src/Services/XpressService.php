@@ -207,8 +207,8 @@ class XpressService
         }
 
         // for stream access
-        if (!$ignoreSession && !$articleSrl
-            || ($articleSrl && ($objDocument && $objDocument->isExists() && $objDocument->getMemberSrl() != $memberSrl))) {
+        if ((!$ignoreSession && !$articleSrl) ||
+            (!$ignoreSession && $articleSrl && ($objDocument && $objDocument->isExists() && $objDocument->getMemberSrl() != $memberSrl))) {
             try {
                 XpressSupport::checkAuthPermission($request, 'stream');
             } catch (AccessDeniedException $exception) {
