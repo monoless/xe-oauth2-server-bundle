@@ -121,12 +121,13 @@ class XpressService
     /**
      * @param RequestInterface|ServerRequest $request
      * @param ResponseInterface $response
+     * @param boolean $ignoreSession
      * @return JsonResponse
      */
-    public static function getArticles(RequestInterface $request, ResponseInterface $response)
+    public static function getArticles(RequestInterface $request, ResponseInterface $response, $ignoreSession = false)
     {
         try {
-            $memberSrl = XpressSupport::checkAuthPermission($request, 'read');
+            $memberSrl = $ignoreSession ? null : XpressSupport::checkAuthPermission($request, 'read');
         } catch (AccessDeniedException $exception) {
             return new JsonResponse([
                 'error' => 'permission_denied',
@@ -206,7 +207,7 @@ class XpressService
         }
 
         // for stream access
-        if (!$articleSrl
+        if (!$ignoreSession && !$articleSrl
             || ($articleSrl && ($objDocument && $objDocument->isExists() && $objDocument->getMemberSrl() != $memberSrl))) {
             try {
                 XpressSupport::checkAuthPermission($request, 'stream');
@@ -401,12 +402,15 @@ class XpressService
     /**
      * @param RequestInterface|ServerRequest $request
      * @param ResponseInterface $response
+     * @param boolean $ignoreSession
      * @return JsonResponse
      */
-    public static function getComments(RequestInterface $request, ResponseInterface $response)
+    public static function getComments(RequestInterface $request, ResponseInterface $response, $ignoreSession = false)
     {
         try {
-            XpressSupport::checkAuthPermission($request, 'stream');
+            if (!$ignoreSession) {
+                XpressSupport::checkAuthPermission($request, 'stream');
+            }
         } catch (AccessDeniedException $exception) {
             return new JsonResponse([
                 'error' => 'permission_denied',

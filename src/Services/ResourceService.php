@@ -71,13 +71,14 @@ class ResourceService
      * @param $publicKeyPath
      * @param \stdClass $config
      * @param callable $callback
+     * @param boolean $ignoreSession
      */
-    public static function processResource($publicKeyPath, \stdClass $config, callable $callback)
+    public static function processResource($publicKeyPath, \stdClass $config, callable $callback, $ignoreSession = false)
     {
         $request = ServerRequest::fromGlobals();
         $response = new Response();
 
-        $queues = [new ResourceServerMiddleware(self::getResourceServer($publicKeyPath))];
+        $queues = !$ignoreSession ? [new ResourceServerMiddleware(self::getResourceServer($publicKeyPath))] : [];
 
         if ($config->use_rate_limiter) {
             $queues[] = [new TerminateQueue(), new InvalidHttpStatusCondition()];
