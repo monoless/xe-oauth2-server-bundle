@@ -210,18 +210,17 @@ class XpressUtil
         $currentPage = 1;
         $totalPage = 1;
 
-        if ($item->comment_page_navigation) {
-            $currentPage = $item->comment_page_navigation->cur_page;
-            $totalPage = $item->comment_page_navigation->total_page;
-        }
-
         $comments = $item->getComments();
+        if ($item->comment_page_navigation) {
+            $currentPage = intval($item->comment_page_navigation->cur_page);
+            $totalPage = intval($item->comment_page_navigation->total_page);
+        }
 
         return [
             'count' => $count,
             'current_page' => $currentPage,
             'total_page' => $totalPage,
-            'entries' => $comments ? self::convertComments($item->getComments()) : null
+            'entries' => $comments ? self::convertComments($item->getComments()) : null,
         ];
     }
 
